@@ -69,7 +69,7 @@ func (h *UserHandler) EditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// checking valid body
-	if len(body.Username) < 1 || (len(body.Email) < 1 && len(body.Fullname) < 1) && len(body.Password) < 1 {
+	if (len(body.Email) < 1 && len(body.Fullname) < 1) && len(body.Password) < 1 {
 		code = http.StatusBadRequest
 		err = fmt.Errorf("Invalid Parameter Request")
 		return

@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"math"
 
 	"github.com/jinzhu/gorm"
 
@@ -109,7 +108,7 @@ func (u *UserStore) DeleteUser(userid int) error {
 		},
 	}
 
-	return db.Unscoped().Delete(&user).Error
+	return db.Delete(&user).Error
 }
 
 // GetUserByID is func to get user info by id on database
@@ -129,47 +128,7 @@ func (u *UserStore) GetUserInfoByID(userid int) (UserStoreInfo, error) {
 		UserId:      int(user.ID),
 		Fullname:    user.Fullname,
 		Email:       user.Email,
+		Password:    user.Password,
 		CreatedDate: user.CreatedAt.String(),
 	}, nil
-}
-
-// GetAllUserInfoWithPagging is func to get all data user info in database
-func (u *UserStore) GetAllUserInfoWithPagging(size, cursor int) ([]UserStoreInfo, int, error) {
-	db, err := u.getDB()
-	var totalCount int
-	if err != nil {
-		return nil, 0, err
-	}
-
-	var users []models.User
-	query := db.Limit(size).Offset((cursor - 1) * size).Order("id asc")
-
-	if err := query.Find(&users).Error; err != nil {
-		return nil, 0, err
-	}
-
-	if err := db.Model(&models.User{}).Count(&totalCount).Error; err != nil {
-		return nil, 0, err
-	}
-
-	totalCursor := int(math.Ceil(float64(totalCount) / float64(size)))
-	var nextCursor int
-	if cursor < totalCursor {
-		nextCursor = cursor + 1
-	} else {
-		nextCursor = 0
-	}
-
-	var listUser []UserStoreInfo
-	for _, user := range users {
-		listUser = append(listUser, UserStoreInfo{
-			UserId:      int(user.ID),
-			Username:    user.Username,
-			Fullname:    user.Fullname,
-			Email:       user.Email,
-			CreatedDate: user.CreatedAt.String(),
-		})
-	}
-
-	return listUser, nextCursor, err
 }

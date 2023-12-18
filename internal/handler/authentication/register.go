@@ -69,22 +69,13 @@ func (h *AuthenticationHandler) RegisterUserHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
-	var token string
-	var ok bool
-	token, ok = r.Context().Value("token").(string)
-	if !ok {
-		code = http.StatusInternalServerError
-		err = fmt.Errorf("Internal Server Error")
-		return
-	}
 	errChan := make(chan error, 1)
 	go func(ctx context.Context) {
 		err = h.service.Register(authentication.RegisterServiceRequest{
-			TokenRequest: token,
-			Username:     body.Username,
-			Password:     body.Password,
-			Fullname:     body.Fullname,
-			Email:        body.Email,
+			Username: body.Username,
+			Password: body.Password,
+			Fullname: body.Fullname,
+			Email:    body.Email,
 		})
 		errChan <- err
 	}(ctx)

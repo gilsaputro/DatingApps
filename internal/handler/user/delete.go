@@ -60,7 +60,7 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// checking valid body
-	if len(body.Username) < 1 || len(body.Password) < 1 {
+	if len(body.Password) < 1 {
 		code = http.StatusBadRequest
 		err = fmt.Errorf("Invalid Parameter Request")
 		return

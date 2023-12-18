@@ -135,6 +135,12 @@ func NewServer() (*Server, error) {
 		log.Println("Init-User Service")
 	}
 
+	{
+		authService := auth_service.NewAuthenticationService(s.userStore, s.tokenMethod, s.hashMethod)
+		s.authService = authService
+		log.Println("Init-Auth Service")
+	}
+
 	// ======== Init Dependencies Handler ========
 	// Init Middleware
 	{
@@ -150,6 +156,15 @@ func NewServer() (*Server, error) {
 		userHandler := user_handler.NewUserHandler(s.userService, opts...)
 		s.userHandler = *userHandler
 		log.Println("Init-User Handler")
+	}
+
+	// Init Auth Handler
+	{
+		var opts []auth_handler.Option
+		opts = append(opts, auth_handler.WithTimeoutOptions(s.cfg.UserHandler.TimeoutInSec))
+		authHandler := auth_handler.NewAuthenticationHandler(s.authService, opts...)
+		s.authHandler = *authHandler
+		log.Println("Init-Auth Handler")
 	}
 
 	// Init Router

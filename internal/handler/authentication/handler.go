@@ -6,7 +6,7 @@ import (
 
 // AuthenticationHandler list dependencies for authentication handler
 type AuthenticationHandler struct {
-	service      authentication.AuthenticationService
+	service      authentication.AuthenticationServiceMethod
 	timeoutInSec int
 }
 
@@ -17,8 +17,8 @@ const (
 	defaultTimeout = 5
 )
 
-// NewUserHandler is func to create http user handler
-func NewUserHandler(service authentication.AuthenticationService, options ...Option) *AuthenticationHandler {
+// NewAuthenticationHandler is func to create http auth handler
+func NewAuthenticationHandler(service authentication.AuthenticationServiceMethod, options ...Option) *AuthenticationHandler {
 	handler := &AuthenticationHandler{
 		service:      service,
 		timeoutInSec: defaultTimeout,

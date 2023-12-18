@@ -23,9 +23,8 @@ type LoginServiceRequest struct {
 
 // RegisterUserServiceRequest is list parameter for register user
 type RegisterServiceRequest struct {
-	TokenRequest string
-	Username     string
-	Password     string
-	Fullname     string
-	Email        string
+	Username string
+	Password string
+	Fullname string
+	Email    string
 }
