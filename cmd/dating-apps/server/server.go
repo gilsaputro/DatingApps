@@ -13,8 +13,10 @@ import (
 	"github.com/joho/godotenv"
 
 	"gilsaputro/dating-apps/cmd/dating-apps/config"
+	auth_handler "gilsaputro/dating-apps/internal/handler/authentication"
 	"gilsaputro/dating-apps/internal/handler/middleware"
 	user_handler "gilsaputro/dating-apps/internal/handler/user"
+	auth_service "gilsaputro/dating-apps/internal/service/authentication"
 	user_service "gilsaputro/dating-apps/internal/service/user"
 	user_store "gilsaputro/dating-apps/internal/store/user"
 	"gilsaputro/dating-apps/pkg/hash"
@@ -34,6 +36,8 @@ type Server struct {
 	userStore   user_store.UserStoreMethod
 	userService user_service.UserServiceMethod
 	userHandler user_handler.UserHandler
+	authService auth_service.AuthenticationServiceMethod
+	authHandler auth_handler.AuthenticationHandler
 	httpServer  *http.Server
 }
 
@@ -126,7 +130,7 @@ func NewServer() (*Server, error) {
 	// ======== Init Dependencies Service ========
 	// Init User Service
 	{
-		userService := user_service.NewUserService(s.userStore, s.tokenMethod, s.hashMethod)
+		userService := user_service.NewUserService(s.userStore, s.hashMethod)
 		s.userService = userService
 		log.Println("Init-User Service")
 	}
@@ -152,14 +156,12 @@ func NewServer() (*Server, error) {
 	{
 		r := mux.NewRouter()
 		// Init Guest Path
-		r.HandleFunc("/login", s.userHandler.LoginUserHandler).Methods("POST")
-		r.HandleFunc("/register", s.middleware.MiddlewareVerifyToken(s.userHandler.RegisterUserHandler)).Methods("POST")
+		r.HandleFunc("/login", s.authHandler.LoginUserHandler).Methods("POST")
+		r.HandleFunc("/register", s.authHandler.RegisterUserHandler).Methods("POST")
 
 		// Init User Path
-		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.AddUserHandler)).Methods("POST")
 		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
 		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
-		r.HandleFunc("/user/{id}", s.middleware.MiddlewareVerifyToken(s.userHandler.GetByIDUserHandler)).Methods("GET")
 
 		port := ":" + s.cfg.Port
 		log.Println("running on port ", port)

@@ -66,9 +66,9 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var token string
+	var userID int
 	var ok bool
-	token, ok = r.Context().Value("token").(string)
+	userID, ok = r.Context().Value("id").(int)
 	if !ok {
 		code = http.StatusInternalServerError
 		err = fmt.Errorf("Internal Server Error")
@@ -78,9 +78,8 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 	errChan := make(chan error, 1)
 	go func(ctx context.Context) {
 		err = h.service.DeleteUser(user.DeleteUserServiceRequest{
-			TokenRequest: token,
-			Username:     body.Username,
-			Password:     body.Password,
+			UserId:   userID,
+			Password: body.Password,
 		})
 		errChan <- err
 	}(ctx)

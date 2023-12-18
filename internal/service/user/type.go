@@ -24,46 +24,22 @@ type UserServiceInfo struct {
 	CreatedDate string
 }
 
-// AddUserServiceRequest is list parameter for add user by user
-type AddUserServiceRequest struct {
-	TokenRequest string
-	Username     string
-	Password     string
-	Fullname     string
-	Email        string
-}
-
 // DeleteUserServiceRequest is list parameter for add user by user
 type DeleteUserServiceRequest struct {
-	TokenRequest string
-	Username     string
-	Password     string
-}
-
-// GetAllUserWithPaggingServiceRequest is list parameter for get user by pagging
-type GetAllUserWithPaggingServiceRequest struct {
-	TokenRequest string
-	Size         int
-	Cursor       int
-}
-
-// GetAllUserWithPaggingServiceResponse is list parameter response for get user by pagging
-type GetAllUserWithPaggingServiceResponse struct {
-	UserList   []UserServiceInfo
-	NextCursor int
+	UserId   int
+	Password string
 }
 
 // UpdateUserServiceRequest is list parameter for update user
 type UpdateUserServiceRequest struct {
-	TokenRequest string
-	Username     string
-	Password     string
-	Fullname     string
-	Email        string
+	UserId   int
+	Username string
+	Password string
+	Fullname string
+	Email    string
 }
 
 // GetByIDServiceRequest is list parameter for get user by id
 type GetByIDServiceRequest struct {
-	TokenRequest string
-	UserId       int64
+	UserId int
 }

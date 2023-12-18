@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"gilsaputro/dating-apps/models"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -31,7 +33,7 @@ func NewPostgresClient(config interface{}) (PostgresMethod, error) {
 		return nil, err
 	}
 	// Automatically create the table for the struct
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&models.User{}, &models.UserMatchHistory{})
 	return &Client{db: db}, nil
 }
 

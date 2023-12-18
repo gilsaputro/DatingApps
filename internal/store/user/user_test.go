@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"fmt"
+	"gilsaputro/dating-apps/models"
 	"gilsaputro/dating-apps/pkg/postgres"
 	mock_postgres "gilsaputro/dating-apps/pkg/postgres/mock"
 	"log"
@@ -132,7 +133,7 @@ func TestUserStore_UpdateUser(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	pg := mock_postgres.NewMockPostgresMethod(mockCtrl)
-	var userDataMock = &postgres.User{
+	var userDataMock = &models.User{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -235,7 +236,7 @@ func TestUserStore_GetUserInfoByUsername(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	pg := mock_postgres.NewMockPostgresMethod(mockCtrl)
-	var userDataMock = &postgres.User{
+	var userDataMock = &models.User{
 		Model: gorm.Model{
 			ID: 1,
 		},
@@ -369,7 +370,7 @@ func TestUserStore_GetUserInfoByID(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	pg := mock_postgres.NewMockPostgresMethod(mockCtrl)
-	var userDataMock = &postgres.User{
+	var userDataMock = &models.User{
 		Model: gorm.Model{
 			ID: 1,
 		},

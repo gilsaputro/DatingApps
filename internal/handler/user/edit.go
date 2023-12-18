@@ -75,9 +75,9 @@ func (h *UserHandler) EditUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var token string
+	var userID int
 	var ok bool
-	token, ok = r.Context().Value("token").(string)
+	userID, ok = r.Context().Value("id").(int)
 	if !ok {
 		code = http.StatusInternalServerError
 		err = fmt.Errorf("Internal Server Error")
@@ -88,11 +88,11 @@ func (h *UserHandler) EditUserHandler(w http.ResponseWriter, r *http.Request) {
 	var result user.UserServiceInfo
 	go func(ctx context.Context) {
 		result, err = h.service.UpdateUser(user.UpdateUserServiceRequest{
-			TokenRequest: token,
-			Username:     body.Username,
-			Password:     body.Password,
-			Fullname:     body.Fullname,
-			Email:        body.Email,
+			UserId:   userID,
+			Username: body.Username,
+			Password: body.Password,
+			Fullname: body.Fullname,
+			Email:    body.Email,
 		})
 		errChan <- err
 	}(ctx)

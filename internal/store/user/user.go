@@ -6,6 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 
+	"gilsaputro/dating-apps/models"
 	"gilsaputro/dating-apps/pkg/postgres"
 )
 
@@ -45,7 +46,7 @@ func (u *UserStore) CreateUser(userinfo UserStoreInfo) error {
 	if err != nil {
 		return err
 	}
-	user := &postgres.User{
+	user := &models.User{
 		Username: userinfo.Username,
 		Password: userinfo.Password,
 		Fullname: userinfo.Fullname,
@@ -62,7 +63,7 @@ func (u *UserStore) UpdateUser(userinfo UserStoreInfo) error {
 		return err
 	}
 
-	var user postgres.User
+	var user models.User
 
 	err = db.Where("username = ? AND id = ?", userinfo.Username, userinfo.UserId).First(&user).Error
 	if err != nil {
@@ -78,7 +79,7 @@ func (u *UserStore) UpdateUser(userinfo UserStoreInfo) error {
 
 // GetUserID is func to get user id by username and password
 func (u *UserStore) GetUserInfoByUsername(username string) (UserStoreInfo, error) {
-	var user postgres.User
+	var user models.User
 	db, err := u.getDB()
 	if err != nil {
 		return UserStoreInfo{}, err
@@ -102,7 +103,7 @@ func (u *UserStore) DeleteUser(userid int) error {
 		return err
 	}
 
-	user := postgres.User{
+	user := models.User{
 		Model: gorm.Model{
 			ID: uint(userid),
 		},
@@ -113,7 +114,7 @@ func (u *UserStore) DeleteUser(userid int) error {
 
 // GetUserByID is func to get user info by id on database
 func (u *UserStore) GetUserInfoByID(userid int) (UserStoreInfo, error) {
-	var user postgres.User
+	var user models.User
 	db, err := u.getDB()
 	if err != nil {
 		return UserStoreInfo{}, err
@@ -140,14 +141,14 @@ func (u *UserStore) GetAllUserInfoWithPagging(size, cursor int) ([]UserStoreInfo
 		return nil, 0, err
 	}
 
-	var users []postgres.User
+	var users []models.User
 	query := db.Limit(size).Offset((cursor - 1) * size).Order("id asc")
 
 	if err := query.Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := db.Model(&postgres.User{}).Count(&totalCount).Error; err != nil {
+	if err := db.Model(&models.User{}).Count(&totalCount).Error; err != nil {
 		return nil, 0, err
 	}
 

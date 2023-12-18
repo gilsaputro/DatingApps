@@ -28,8 +28,7 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			},
 			args: args{
 				bodyGenerate: TokenBody{
-					UserID:   1,
-					Username: "user1",
+					UserID: 1,
 				},
 			},
 			mockFunc: func(s string) string {
@@ -38,8 +37,7 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			wantErrValidate: false,
 			wantErr:         false,
 			want: TokenBody{
-				UserID:   1,
-				Username: "user1",
+				UserID: 1,
 			},
 		},
 		{
@@ -50,8 +48,7 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			},
 			args: args{
 				bodyGenerate: TokenBody{
-					UserID:   1,
-					Username: "user1",
+					UserID: 1,
 				},
 			},
 			mockFunc: func(s string) string {
@@ -76,8 +73,7 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			},
 			args: args{
 				bodyGenerate: TokenBody{
-					UserID:   1,
-					Username: "user1",
+					UserID: 1,
 				},
 			},
 			mockFunc: func(s string) string {
@@ -102,8 +98,7 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			},
 			args: args{
 				bodyGenerate: TokenBody{
-					UserID:   1,
-					Username: "user1",
+					UserID: 1,
 				},
 			},
 			mockFunc: func(s string) string {

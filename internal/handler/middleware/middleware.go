@@ -40,10 +40,17 @@ func (m *Middleware) MiddlewareVerifyToken(next http.HandlerFunc) http.HandlerFu
 		}
 
 		// Extract the token from the Authorization header
-		token := strings.TrimPrefix(authHeader, "Bearer ")
+		auth := strings.TrimPrefix(authHeader, "Bearer ")
+
+		tokenBody, err := m.tokenMethod.ValidateToken(auth)
+		if err != nil {
+			data := []byte(`{"code":401,"message":"unauthorized"}`)
+			utilhttp.WriteResponse(w, data, http.StatusUnauthorized)
+			return
+		}
 
 		// Parse variable into context
-		r = r.WithContext(context.WithValue(r.Context(), "token", token))
+		r = r.WithContext(context.WithValue(r.Context(), "id", tokenBody.UserID))
 		next.ServeHTTP(w, r)
 	}
 }
