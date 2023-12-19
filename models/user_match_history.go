@@ -5,9 +5,10 @@ import "github.com/jinzhu/gorm"
 // UserMatchHistory struct to user match history information
 type UserMatchHistory struct {
 	gorm.Model
-	UserID    uint
-	PartnerID uint
-	Status    MatchStatus
+	UserID      uint
+	PartnerID   uint
+	PartnerName string
+	Status      MatchStatus
 }
 
 type MatchStatus int
@@ -24,4 +25,11 @@ var MatchStatusToString = map[MatchStatus]string{
 	MatchStatusPending:  "PENDING",
 	MatchStatusApproved: "APPROVED",
 	MatchStatusRejected: "REJECTED",
+}
+
+func (m MatchStatus) String() string {
+	if val, ok := MatchStatusToString[m]; ok {
+		return val
+	}
+	return MatchStatusToString[-1]
 }

@@ -1,25 +1,25 @@
-package find
+package partner
 
 import (
-	"gilsaputro/dating-apps/internal/service/find"
+	"gilsaputro/dating-apps/internal/service/partner"
 )
 
-// FindHandler list dependencies for Find handler
-type FindHandler struct {
-	service      find.FindServiceMethod
+// PartnerHandler list dependencies for partner handler
+type PartnerHandler struct {
+	service      partner.PartnerServiceMethod
 	timeoutInSec int
 }
 
 // Option set options for http handler config
-type Option func(*FindHandler)
+type Option func(*PartnerHandler)
 
 const (
 	defaultTimeout = 5
 )
 
-// NewFindHandler is func to create http Find handler
-func NewFindHandler(service find.FindServiceMethod, options ...Option) *FindHandler {
-	handler := &FindHandler{
+// NewPartnerHandler is func to create http partner handler
+func NewPartnerHandler(service partner.PartnerServiceMethod, options ...Option) *PartnerHandler {
+	handler := &PartnerHandler{
 		service:      service,
 		timeoutInSec: defaultTimeout,
 	}
@@ -35,7 +35,7 @@ func NewFindHandler(service find.FindServiceMethod, options ...Option) *FindHand
 // WithTimeoutOptions is func to set timeout config into handler
 func WithTimeoutOptions(timeoutinsec int) Option {
 	return Option(
-		func(h *FindHandler) {
+		func(h *PartnerHandler) {
 			if timeoutinsec <= 0 {
 				timeoutinsec = defaultTimeout
 			}

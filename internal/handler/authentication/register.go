@@ -89,8 +89,6 @@ func (h *AuthenticationHandler) RegisterUserHandler(w http.ResponseWriter, r *ht
 		if err != nil {
 			if err == user.ErrUserNameAlreadyExists {
 				code = http.StatusConflict
-			} else if err == user.ErrNotGuest {
-				code = http.StatusUnauthorized
 			} else {
 				code = http.StatusInternalServerError
 			}

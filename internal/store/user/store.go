@@ -64,7 +64,6 @@ func (u *UserStore) UpdateUser(userinfo UserStoreInfo) error {
 	}
 
 	var user models.User
-
 	err = db.Where("username = ? AND id = ?", userinfo.Username, userinfo.UserId).First(&user).Error
 	if err != nil {
 		return err

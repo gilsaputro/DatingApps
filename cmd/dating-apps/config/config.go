@@ -11,15 +11,15 @@ import (
 
 // Config struct to hold the configuration data for server
 type Config struct {
-	Port        string   `yaml:"port"`
-	Postgres    Postgres `yaml:"postgres"`
-	Redis       Redis    `yaml:"redis"`
-	Hash        Hash     `yaml:"hash"`
-	Token       Token    `yaml:"token"`
-	UserHandler Handler  `yaml:"user_handler"`
-	AuthHandler Handler  `yaml:"auth_handler"`
-	FindHandler Handler  `yaml:"find_handler"`
-	MaxCounter  int      `yaml:"max_find_counter"`
+	Port           string   `yaml:"port"`
+	Postgres       Postgres `yaml:"postgres"`
+	Redis          Redis    `yaml:"redis"`
+	Hash           Hash     `yaml:"hash"`
+	Token          Token    `yaml:"token"`
+	UserHandler    Handler  `yaml:"user_handler"`
+	AuthHandler    Handler  `yaml:"auth_handler"`
+	PartnerHandler Handler  `yaml:"partner_handler"`
+	MaxCounter     int      `yaml:"max_find_counter"`
 }
 
 // Postgres struct to hold the configuration data for postgres

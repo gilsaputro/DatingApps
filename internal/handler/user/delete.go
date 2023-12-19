@@ -93,8 +93,6 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 		if err != nil {
 			if err == user.ErrUserNameNotExists || err == user.ErrPasswordIsIncorrect {
 				code = http.StatusBadRequest
-			} else if err == user.ErrUnauthorized || err == user.ErrCannotDeleteOtherUser {
-				code = http.StatusUnauthorized
 			} else {
 				code = http.StatusInternalServerError
 			}

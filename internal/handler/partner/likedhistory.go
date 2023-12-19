@@ -1,11 +1,11 @@
-package find
+package partner
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"gilsaputro/dating-apps/internal/handler/utilhttp"
-	"gilsaputro/dating-apps/internal/service/find"
+	"gilsaputro/dating-apps/internal/service/partner"
 	"gilsaputro/dating-apps/internal/service/user"
 	"log"
 	"net/http"
@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// CurrentPartnerHandler is func handler for get current partner
-func (h *FindHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Request) {
+// LikedHistoryHandler is func handler for get current partner
+func (h *PartnerHandler) LikedHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)
 	defer cancel()
 
@@ -32,7 +32,7 @@ func (h *FindHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Reque
 
 		data, errMarshal := json.Marshal(response)
 		if errMarshal != nil {
-			log.Println("[FindPartnerHandler]-Error Marshal Response :", err)
+			log.Println("[LikedHistoryHandler]-Error Marshal Response :", err)
 			code = http.StatusInternalServerError
 			data = []byte(`{"code":500,"message":"Internal Server Error"}`)
 		}
@@ -57,9 +57,9 @@ func (h *FindHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	errChan := make(chan error, 1)
-	var partnerInfo find.PartnerServiceInfo
+	var partnerInfo []partner.PartnerServiceInfo
 	go func(ctx context.Context) {
-		partnerInfo, err = h.service.GetCurrentPartner(find.FindPartnerServiceRequest{
+		partnerInfo, err = h.service.GetListLikedPartner(partner.PartnerServiceRequest{
 			UserID:     userID,
 			IsVerified: isVerified,
 		})
@@ -83,5 +83,24 @@ func (h *FindHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	response = mapResponseLogin(partnerInfo)
+	response = mapListResponse(partnerInfo)
+}
+
+func mapListResponse(result []partner.PartnerServiceInfo) utilhttp.StandardResponse {
+	var res utilhttp.StandardResponse
+	var list []PartnerResponse
+	for _, data := range result {
+		list = append(list, PartnerResponse{
+			PartnerID:   data.PartnerID,
+			Fullname:    data.Fullname,
+			Status:      data.Fullname,
+			CreatedDate: data.CreatedDate,
+		})
+	}
+
+	if len(list) > 0 {
+		res.Data = list
+	}
+
+	return res
 }

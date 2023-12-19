@@ -36,5 +36,3 @@ services:
     container_name: "redis_local"
     ports:
       - "6379:6379"
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}

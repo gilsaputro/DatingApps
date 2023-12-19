@@ -14,14 +14,15 @@ import (
 
 	"gilsaputro/dating-apps/cmd/dating-apps/config"
 	auth_handler "gilsaputro/dating-apps/internal/handler/authentication"
-	find_handler "gilsaputro/dating-apps/internal/handler/find"
 	"gilsaputro/dating-apps/internal/handler/middleware"
+	partner_handler "gilsaputro/dating-apps/internal/handler/partner"
 	user_handler "gilsaputro/dating-apps/internal/handler/user"
 	auth_service "gilsaputro/dating-apps/internal/service/authentication"
-	find_service "gilsaputro/dating-apps/internal/service/find"
+	partner_service "gilsaputro/dating-apps/internal/service/partner"
 	user_service "gilsaputro/dating-apps/internal/service/user"
-	find_store "gilsaputro/dating-apps/internal/store/findcache"
+	partner_store "gilsaputro/dating-apps/internal/store/partnercache"
 	user_store "gilsaputro/dating-apps/internal/store/user"
+	userhist_store "gilsaputro/dating-apps/internal/store/userhistory"
 	"gilsaputro/dating-apps/pkg/hash"
 	"gilsaputro/dating-apps/pkg/postgres"
 	"gilsaputro/dating-apps/pkg/redis"
@@ -31,22 +32,23 @@ import (
 
 // Servcer is list configuration to run Server
 type Server struct {
-	cfg         config.Config
-	vault       vault.VaultMethod
-	hashMethod  hash.HashMethod
-	tokenMethod token.TokenMethod
-	postgres    postgres.PostgresMethod
-	redisMethod redis.RedisMethod
-	middleware  middleware.Middleware
-	userStore   user_store.UserStoreMethod
-	userService user_service.UserServiceMethod
-	userHandler user_handler.UserHandler
-	authService auth_service.AuthenticationServiceMethod
-	authHandler auth_handler.AuthenticationHandler
-	findStore   find_store.FindCacheStoreMethod
-	findService find_service.FindServiceMethod
-	findHandler find_handler.FindHandler
-	httpServer  *http.Server
+	cfg            config.Config
+	vault          vault.VaultMethod
+	hashMethod     hash.HashMethod
+	tokenMethod    token.TokenMethod
+	postgres       postgres.PostgresMethod
+	redisMethod    redis.RedisMethod
+	middleware     middleware.Middleware
+	userStore      user_store.UserStoreMethod
+	userService    user_service.UserServiceMethod
+	userHandler    user_handler.UserHandler
+	authService    auth_service.AuthenticationServiceMethod
+	authHandler    auth_handler.AuthenticationHandler
+	partnerStore   partner_store.PartnerCacheStoreMethod
+	partnerService partner_service.PartnerServiceMethod
+	partnerHandler partner_handler.PartnerHandler
+	userHistStore  userhist_store.UserHistoryStoreMethod
+	httpServer     *http.Server
 }
 
 // NewServer is func to create server with all configuration
@@ -147,9 +149,15 @@ func NewServer() (*Server, error) {
 	}
 
 	{
-		findStore := find_store.NewFindCacheStore(s.redisMethod)
-		s.findStore = findStore
-		log.Println("Init-Find Cache Store")
+		userHistStore := userhist_store.NewUserHistoryStore(s.postgres)
+		s.userHistStore = userHistStore
+		log.Println("Init-User History Store")
+	}
+
+	{
+		partnerStore := partner_store.NewPartnerCacheStore(s.redisMethod)
+		s.partnerStore = partnerStore
+		log.Println("Init-Partner Cache Store")
 	}
 
 	// ======== Init Dependencies Service ========
@@ -167,9 +175,9 @@ func NewServer() (*Server, error) {
 	}
 
 	{
-		findService := find_service.NewFindService(s.userStore, s.findStore, s.cfg.MaxCounter)
-		s.findService = findService
-		log.Println("Init-Find Service")
+		partnerService := partner_service.NewPartnerService(s.userStore, s.userHistStore, s.partnerStore, s.cfg.MaxCounter)
+		s.partnerService = partnerService
+		log.Println("Init-Partner Service")
 	}
 
 	// ======== Init Dependencies Handler ========
@@ -198,29 +206,31 @@ func NewServer() (*Server, error) {
 		log.Println("Init-Auth Handler")
 	}
 
-	// Init Find Handler
+	// Init Partner Handler
 	{
-		var opts []find_handler.Option
-		opts = append(opts, find_handler.WithTimeoutOptions(s.cfg.FindHandler.TimeoutInSec))
-		findHandler := find_handler.NewFindHandler(s.findService, opts...)
-		s.findHandler = *findHandler
-		log.Println("Init-Find Handler")
+		var opts []partner_handler.Option
+		opts = append(opts, partner_handler.WithTimeoutOptions(s.cfg.PartnerHandler.TimeoutInSec))
+		partnerHandler := partner_handler.NewPartnerHandler(s.partnerService, opts...)
+		s.partnerHandler = *partnerHandler
+		log.Println("Init-Partner Handler")
 	}
 
 	// Init Router
 	{
 		r := mux.NewRouter()
 		// Init Guest Path
-		r.HandleFunc("/login", s.authHandler.LoginUserHandler).Methods("POST")
-		r.HandleFunc("/register", s.authHandler.RegisterUserHandler).Methods("POST")
+		r.HandleFunc("/v1/login", s.authHandler.LoginUserHandler).Methods("POST")
+		r.HandleFunc("/v1/register", s.authHandler.RegisterUserHandler).Methods("POST")
 
 		// Init User Path
-		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
-		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
+		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
+		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
 
-		// Init Find Partner Path
-		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.CurrentPartnerHandler)).Methods("GET")
-		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.FindPartnerHandler)).Methods("POST")
+		// Init Partner Partner Path
+		r.HandleFunc("/v1/partner", s.middleware.MiddlewareVerifyToken(s.partnerHandler.CurrentPartnerHandler)).Methods("GET")
+		r.HandleFunc("/v1/partner/history", s.middleware.MiddlewareVerifyToken(s.partnerHandler.LikedHistoryHandler)).Methods("GET")
+		r.HandleFunc("/v1/partner/pass", s.middleware.MiddlewareVerifyToken(s.partnerHandler.PassPartnerHandler)).Methods("POST")
+		r.HandleFunc("/v1/partner/like", s.middleware.MiddlewareVerifyToken(s.partnerHandler.LikePartnerHandler)).Methods("POST")
 
 		port := ":" + s.cfg.Port
 		log.Println("running on port ", port)

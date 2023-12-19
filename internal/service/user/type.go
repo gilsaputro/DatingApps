@@ -4,15 +4,11 @@ import "errors"
 
 // list Service error
 var (
-	ErrNotGuest              = errors.New("register feature only available for guest")
 	ErrUserNameNotExists     = errors.New("username is not exists")
 	ErrUserNameAlreadyExists = errors.New("username already exists")
 	ErrPasswordIsIncorrect   = errors.New("password is incorrect")
 	ErrUnauthorized          = errors.New("unauthorized")
-	ErrCannotDeleteOtherUser = errors.New("cannot delete other user, please login first")
 	ErrDataNotFound          = errors.New("data not found")
-	ErrCannotUpdateOtherUser = errors.New("cannot edit other user, please login first")
-	ErrCannotGetOtherUser    = errors.New("cannot get other user data")
 )
 
 // UserServiceInfo struct is list parameter info for user sevice
