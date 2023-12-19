@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"gilsaputro/dating-apps/internal/handler/utilhttp"
+	"gilsaputro/dating-apps/internal/store/user"
 	"gilsaputro/dating-apps/pkg/token"
 	"net/http"
 	"strings"
@@ -11,12 +12,14 @@ import (
 // Middleware struct is list dependecies to run Middleware func
 type Middleware struct {
 	tokenMethod token.TokenMethod
+	userStore   user.UserStoreMethod
 }
 
 // NewMiddleware is func to create Middleware Struct
-func NewMiddleware(tokenMethod token.TokenMethod) Middleware {
+func NewMiddleware(tokenMethod token.TokenMethod, userStore user.UserStoreMethod) Middleware {
 	return Middleware{
 		tokenMethod: tokenMethod,
+		userStore:   userStore,
 	}
 }
 
@@ -51,7 +54,29 @@ func (m *Middleware) MiddlewareVerifyToken(next http.HandlerFunc) http.HandlerFu
 
 		// Parse variable into context
 		r = r.WithContext(context.WithValue(r.Context(), "id", tokenBody.UserID))
-		r = r.WithContext(context.WithValue(r.Context(), "isverified", tokenBody.IsVerified))
+		next.ServeHTTP(w, r)
+	}
+}
+
+// MiddlewareCheckVerifiedStatus is func to validate before execute the handler
+func (m *Middleware) MiddlewareCheckVerifiedStatus(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value("id").(int)
+		if !ok {
+			data := []byte(`{"code":500,"message":"Internal Server Error"}`)
+			utilhttp.WriteResponse(w, data, http.StatusInternalServerError)
+			return
+		}
+
+		userInfo, err := m.userStore.GetUserInfoByID(userID)
+		if err != nil {
+			data := []byte(`{"code":500,"message":"Internal Server Error"}`)
+			utilhttp.WriteResponse(w, data, http.StatusInternalServerError)
+			return
+		}
+
+		// Parse variable into context
+		r = r.WithContext(context.WithValue(r.Context(), "isverified", userInfo.IsVerified))
 		next.ServeHTTP(w, r)
 	}
 }

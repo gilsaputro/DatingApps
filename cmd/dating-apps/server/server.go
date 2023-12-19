@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"gilsaputro/dating-apps/cmd/dating-apps/config"
+	"gilsaputro/dating-apps/cmd/dating-apps/seed"
 	auth_handler "gilsaputro/dating-apps/internal/handler/authentication"
 	"gilsaputro/dating-apps/internal/handler/middleware"
 	partner_handler "gilsaputro/dating-apps/internal/handler/partner"
@@ -183,7 +184,7 @@ func NewServer() (*Server, error) {
 	// ======== Init Dependencies Handler ========
 	// Init Middleware
 	{
-		midlewareService := middleware.NewMiddleware(s.tokenMethod)
+		midlewareService := middleware.NewMiddleware(s.tokenMethod, s.userStore)
 		s.middleware = midlewareService
 		log.Println("Init-Middleware")
 	}
@@ -215,6 +216,16 @@ func NewServer() (*Server, error) {
 		log.Println("Init-Partner Handler")
 	}
 
+	// Generate Seed
+	{
+		err := seed.GenerateSeed(s.userStore, s.hashMethod)
+		if err != nil {
+			fmt.Print("[Got Error]-Seed :", err)
+			return s, err
+		}
+		log.Println("Init-Seed")
+	}
+
 	// Init Router
 	{
 		r := mux.NewRouter()
@@ -227,10 +238,10 @@ func NewServer() (*Server, error) {
 		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
 
 		// Init Partner Partner Path
-		r.HandleFunc("/v1/partner", s.middleware.MiddlewareVerifyToken(s.partnerHandler.CurrentPartnerHandler)).Methods("GET")
-		r.HandleFunc("/v1/partner/history", s.middleware.MiddlewareVerifyToken(s.partnerHandler.LikedHistoryHandler)).Methods("GET")
-		r.HandleFunc("/v1/partner/pass", s.middleware.MiddlewareVerifyToken(s.partnerHandler.PassPartnerHandler)).Methods("POST")
-		r.HandleFunc("/v1/partner/like", s.middleware.MiddlewareVerifyToken(s.partnerHandler.LikePartnerHandler)).Methods("POST")
+		r.HandleFunc("/v1/partner", s.middleware.MiddlewareVerifyToken(s.middleware.MiddlewareCheckVerifiedStatus(s.partnerHandler.CurrentPartnerHandler))).Methods("GET")
+		r.HandleFunc("/v1/partner/history", s.middleware.MiddlewareVerifyToken(s.middleware.MiddlewareCheckVerifiedStatus(s.partnerHandler.LikedHistoryHandler))).Methods("GET")
+		r.HandleFunc("/v1/partner/pass", s.middleware.MiddlewareVerifyToken(s.middleware.MiddlewareCheckVerifiedStatus(s.partnerHandler.PassPartnerHandler))).Methods("POST")
+		r.HandleFunc("/v1/partner/like", s.middleware.MiddlewareVerifyToken(s.middleware.MiddlewareCheckVerifiedStatus(s.partnerHandler.LikePartnerHandler))).Methods("POST")
 
 		port := ":" + s.cfg.Port
 		log.Println("running on port ", port)

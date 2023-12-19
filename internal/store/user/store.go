@@ -11,11 +11,11 @@ import (
 
 // UserStoreMethod is set of methods for interacting with a user storage system
 type UserStoreMethod interface {
-	CreateUser(userinfo UserStoreInfo) error
-	UpdateUser(userinfo UserStoreInfo) error
+	CreateUser(userinfo models.User) error
+	UpdateUser(userinfo models.User) error
 	DeleteUser(userid int) error
-	GetUserInfoByUsername(username string) (UserStoreInfo, error)
-	GetUserInfoByID(userid int) (UserStoreInfo, error)
+	GetUserInfoByUsername(username string) (models.User, error)
+	GetUserInfoByID(userid int) (models.User, error)
 	Count() (int, error)
 }
 
@@ -41,30 +41,24 @@ func (u *UserStore) getDB() (*gorm.DB, error) {
 }
 
 // CreateUser is func to store / create user info into database
-func (u *UserStore) CreateUser(userinfo UserStoreInfo) error {
+func (u *UserStore) CreateUser(userinfo models.User) error {
 	db, err := u.getDB()
 	if err != nil {
 		return err
 	}
-	user := &models.User{
-		Username: userinfo.Username,
-		Password: userinfo.Password,
-		Fullname: userinfo.Fullname,
-		Email:    userinfo.Email,
-	}
 
-	return db.Create(user).Error
+	return db.Create(&userinfo).Error
 }
 
 // UpdateUser is func to edit / update user info into database
-func (u *UserStore) UpdateUser(userinfo UserStoreInfo) error {
+func (u *UserStore) UpdateUser(userinfo models.User) error {
 	db, err := u.getDB()
 	if err != nil {
 		return err
 	}
 
 	var user models.User
-	err = db.Where("username = ? AND id = ?", userinfo.Username, userinfo.UserId).First(&user).Error
+	err = db.Where("username = ? AND id = ?", userinfo.Username, userinfo.ID).First(&user).Error
 	if err != nil {
 		return err
 	}
@@ -77,26 +71,18 @@ func (u *UserStore) UpdateUser(userinfo UserStoreInfo) error {
 }
 
 // GetUserID is func to get user id by username and password
-func (u *UserStore) GetUserInfoByUsername(username string) (UserStoreInfo, error) {
+func (u *UserStore) GetUserInfoByUsername(username string) (models.User, error) {
 	var user models.User
 	db, err := u.getDB()
 	if err != nil {
-		return UserStoreInfo{}, err
+		return models.User{}, err
 	}
 
 	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
-		return UserStoreInfo{}, err
+		return models.User{}, err
 	}
 
-	return UserStoreInfo{
-		UserId:      int(user.ID),
-		Username:    user.Username,
-		Password:    user.Password,
-		Fullname:    user.Fullname,
-		Email:       user.Email,
-		IsVerified:  user.IsVerified,
-		CreatedDate: user.CreatedAt.String(),
-	}, nil
+	return user, nil
 }
 
 // DeleteUser is func to delete user info on database
@@ -116,26 +102,18 @@ func (u *UserStore) DeleteUser(userid int) error {
 }
 
 // GetUserByID is func to get user info by id on database
-func (u *UserStore) GetUserInfoByID(userid int) (UserStoreInfo, error) {
+func (u *UserStore) GetUserInfoByID(userid int) (models.User, error) {
 	var user models.User
 	db, err := u.getDB()
 	if err != nil {
-		return UserStoreInfo{}, err
+		return models.User{}, err
 	}
 
 	if err := db.First(&user, userid).Error; err != nil {
-		return UserStoreInfo{}, err
+		return models.User{}, err
 	}
 
-	return UserStoreInfo{
-		UserId:      int(user.ID),
-		Username:    user.Username,
-		Password:    user.Password,
-		Fullname:    user.Fullname,
-		Email:       user.Email,
-		IsVerified:  user.IsVerified,
-		CreatedDate: user.CreatedAt.String(),
-	}, nil
+	return user, nil
 }
 
 // GetUserByID is func to get user info by id on database

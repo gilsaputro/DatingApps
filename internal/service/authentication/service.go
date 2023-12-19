@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"gilsaputro/dating-apps/internal/store/user"
+	"gilsaputro/dating-apps/models"
 	"gilsaputro/dating-apps/pkg/hash"
 	"gilsaputro/dating-apps/pkg/token"
 	"strings"
@@ -36,7 +37,7 @@ func (u *AuthenticationService) Login(request LoginServiceRequest) (string, erro
 		return "", err
 	}
 
-	if AuthenticationInfo.UserId <= 0 {
+	if AuthenticationInfo.ID <= 0 {
 		return "", ErrUserNameNotExists
 	}
 
@@ -45,8 +46,7 @@ func (u *AuthenticationService) Login(request LoginServiceRequest) (string, erro
 	}
 
 	return u.token.GenerateToken(token.TokenBody{
-		UserID:     AuthenticationInfo.UserId,
-		IsVerified: AuthenticationInfo.IsVerified,
+		UserID: int(AuthenticationInfo.ID),
 	})
 }
 
@@ -57,7 +57,7 @@ func (u *AuthenticationService) Register(request RegisterServiceRequest) error {
 		return err
 	}
 
-	if AuthenticationInfo.UserId > 0 {
+	if AuthenticationInfo.ID > 0 {
 		return ErrUserNameAlreadyExists
 	}
 
@@ -66,7 +66,7 @@ func (u *AuthenticationService) Register(request RegisterServiceRequest) error {
 		return err
 	}
 
-	return u.store.CreateUser(user.UserStoreInfo{
+	return u.store.CreateUser(models.User{
 		Username: request.Username,
 		Password: string(hashPassword),
 		Fullname: request.Fullname,

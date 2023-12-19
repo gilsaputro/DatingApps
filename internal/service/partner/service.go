@@ -67,7 +67,7 @@ func (f PartnerService) PassPartner(request PartnerServiceRequest) (PartnerServi
 		return PartnerServiceInfo{}, err
 	}
 
-	status := f.getPartnerStatus(request.UserID, PartnerInfo.UserId)
+	status := f.getPartnerStatus(request.UserID, int(PartnerInfo.ID))
 
 	// Set NewPartnerID to History and Add Counter
 	if !request.IsVerified && status == "PENDING" {
@@ -76,10 +76,10 @@ func (f PartnerService) PassPartner(request PartnerServiceRequest) (PartnerServi
 	}
 
 	return PartnerServiceInfo{
-		PartnerID:   PartnerInfo.UserId,
+		PartnerID:   int(PartnerInfo.ID),
 		Fullname:    PartnerInfo.Fullname,
 		Status:      status,
-		CreatedDate: PartnerInfo.CreatedDate,
+		CreatedDate: PartnerInfo.CreatedAt.String(),
 	}, nil
 }
 
@@ -206,13 +206,13 @@ func (f PartnerService) GetCurrentPartner(request PartnerServiceRequest) (Partne
 		return PartnerServiceInfo{}, err
 	}
 
-	status := f.getPartnerStatus(request.UserID, PartnerInfo.UserId)
+	status := f.getPartnerStatus(request.UserID, int(PartnerInfo.ID))
 
 	return PartnerServiceInfo{
-		PartnerID:   PartnerInfo.UserId,
+		PartnerID:   int(PartnerInfo.ID),
 		Fullname:    PartnerInfo.Fullname,
 		Status:      status,
-		CreatedDate: PartnerInfo.CreatedDate,
+		CreatedDate: PartnerInfo.CreatedAt.String(),
 	}, nil
 }
 
@@ -222,15 +222,13 @@ func (f PartnerService) LikePartner(request PartnerServiceRequest) error {
 	if err != nil {
 		return err
 	}
-
 	intPartnerID, err := strconv.Atoi(partnerID)
 	if err != nil {
 		intPartnerID = 0
 	}
-
 	// if partner id is not set return error
 	if intPartnerID <= 0 {
-		return err
+		return ErrCurrentPartnerIsMissing
 	}
 
 	count, err := f.storeHist.CountByUserIDAndPartnerID(request.UserID, intPartnerID)
@@ -261,7 +259,7 @@ func (f PartnerService) LikePartner(request PartnerServiceRequest) error {
 
 	f.storeHist.CreateUserHistory(models.UserMatchHistory{
 		UserID:      uint(request.UserID),
-		PartnerID:   uint(partnerInfo.UserId),
+		PartnerID:   uint(partnerInfo.ID),
 		PartnerName: partnerInfo.Fullname,
 		Status:      status,
 	})

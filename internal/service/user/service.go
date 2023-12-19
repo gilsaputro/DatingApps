@@ -34,8 +34,8 @@ func (u *UserService) DeleteUser(request DeleteUserServiceRequest) error {
 	}
 
 	userInfo, err := u.store.GetUserInfoByID(request.UserId)
-	if err != nil || userInfo.UserId <= 0 {
-		if (err == nil && userInfo.UserId <= 0) || strings.Contains(err.Error(), "not found") {
+	if err != nil || userInfo.ID <= 0 {
+		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
 			return ErrUserNameNotExists
 		}
 		return err
@@ -45,7 +45,7 @@ func (u *UserService) DeleteUser(request DeleteUserServiceRequest) error {
 		return ErrPasswordIsIncorrect
 	}
 
-	return u.store.DeleteUser(userInfo.UserId)
+	return u.store.DeleteUser(int(userInfo.ID))
 }
 
 // UpdateUser is service level func to validate and update user info in database
@@ -55,8 +55,8 @@ func (u *UserService) UpdateUser(request UpdateUserServiceRequest) (UserServiceI
 	}
 
 	userInfo, err := u.store.GetUserInfoByID(request.UserId)
-	if err != nil || userInfo.UserId <= 0 {
-		if (err == nil && userInfo.UserId <= 0) || strings.Contains(err.Error(), "not found") {
+	if err != nil || userInfo.ID <= 0 {
+		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
 			return UserServiceInfo{}, ErrUserNameNotExists
 		}
 		return UserServiceInfo{}, err
@@ -85,29 +85,29 @@ func (u *UserService) UpdateUser(request UpdateUserServiceRequest) (UserServiceI
 	}
 
 	return UserServiceInfo{
-		UserId:      userInfo.UserId,
+		UserId:      int(userInfo.ID),
 		Username:    userInfo.Username,
 		Fullname:    userInfo.Fullname,
 		Email:       userInfo.Email,
-		CreatedDate: userInfo.CreatedDate,
+		CreatedDate: userInfo.CreatedAt.String(),
 	}, nil
 }
 
 // GetUserByID is service level func to validate and get all user based id
 func (u *UserService) GetUserByID(request GetByIDServiceRequest) (UserServiceInfo, error) {
 	userInfo, err := u.store.GetUserInfoByID(int(request.UserId))
-	if err != nil || userInfo.UserId <= 0 {
-		if (err == nil && userInfo.UserId <= 0) || strings.Contains(err.Error(), "not found") {
+	if err != nil || userInfo.ID <= 0 {
+		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
 			return UserServiceInfo{}, ErrUserNameNotExists
 		}
 		return UserServiceInfo{}, err
 	}
 
 	return UserServiceInfo{
-		UserId:      userInfo.UserId,
+		UserId:      int(userInfo.ID),
 		Username:    userInfo.Username,
 		Fullname:    userInfo.Fullname,
 		Email:       userInfo.Email,
-		CreatedDate: userInfo.CreatedDate,
+		CreatedDate: userInfo.CreatedAt.String(),
 	}, nil
 }
