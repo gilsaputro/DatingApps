@@ -16,6 +16,7 @@ type UserStoreMethod interface {
 	DeleteUser(userid int) error
 	GetUserInfoByUsername(username string) (UserStoreInfo, error)
 	GetUserInfoByID(userid int) (UserStoreInfo, error)
+	Count() (int, error)
 }
 
 // UserStore is list dependencies user store
@@ -89,9 +90,13 @@ func (u *UserStore) GetUserInfoByUsername(username string) (UserStoreInfo, error
 	}
 
 	return UserStoreInfo{
-		UserId:   int(user.ID),
-		Username: user.Username,
-		Password: user.Password,
+		UserId:      int(user.ID),
+		Username:    user.Username,
+		Password:    user.Password,
+		Fullname:    user.Fullname,
+		Email:       user.Email,
+		IsVerified:  user.IsVerified,
+		CreatedDate: user.CreatedAt.String(),
 	}, nil
 }
 
@@ -124,11 +129,28 @@ func (u *UserStore) GetUserInfoByID(userid int) (UserStoreInfo, error) {
 	}
 
 	return UserStoreInfo{
-		Username:    user.Username,
 		UserId:      int(user.ID),
+		Username:    user.Username,
+		Password:    user.Password,
 		Fullname:    user.Fullname,
 		Email:       user.Email,
-		Password:    user.Password,
+		IsVerified:  user.IsVerified,
 		CreatedDate: user.CreatedAt.String(),
 	}, nil
+}
+
+// GetUserByID is func to get user info by id on database
+func (u *UserStore) Count() (int, error) {
+	var user models.User
+	db, err := u.getDB()
+	if err != nil {
+		return 0, err
+	}
+
+	var count int
+	if err := db.Model(&user).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }

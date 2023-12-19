@@ -7,5 +7,6 @@ type UserStoreInfo struct {
 	Password    string
 	Fullname    string
 	Email       string
+	IsVerified  bool
 	CreatedDate string
 }

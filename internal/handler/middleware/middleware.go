@@ -51,6 +51,7 @@ func (m *Middleware) MiddlewareVerifyToken(next http.HandlerFunc) http.HandlerFu
 
 		// Parse variable into context
 		r = r.WithContext(context.WithValue(r.Context(), "id", tokenBody.UserID))
+		r = r.WithContext(context.WithValue(r.Context(), "isverified", tokenBody.IsVerified))
 		next.ServeHTTP(w, r)
 	}
 }

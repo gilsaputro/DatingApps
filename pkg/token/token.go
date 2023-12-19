@@ -19,11 +19,10 @@ type TokenMethod interface {
 	ValidateToken(string) (TokenBody, error)
 }
 
-const TokenContext = "ctx_token"
-
 // TokenBody is list parameter that will be stored as token
 type TokenBody struct {
-	UserID int
+	UserID     int
+	IsVerified bool
 }
 
 // NewTokenMethod is func to generate TokenMethod interface
@@ -37,8 +36,9 @@ func NewTokenMethod(secret string, expinHour int64) TokenMethod {
 // GenerateToken is func to generate token from body
 func (t TokenConfig) GenerateToken(body TokenBody) (string, error) {
 	claims := jwt.MapClaims{
-		"userid": body.UserID,
-		"exp":    time.Now().Add(time.Hour * time.Duration(t.ExpTimeInHour)).Unix(),
+		"userid":     body.UserID,
+		"isverified": body.IsVerified,
+		"exp":        time.Now().Add(time.Hour * time.Duration(t.ExpTimeInHour)).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -62,8 +62,13 @@ func (t TokenConfig) ValidateToken(tokenString string) (TokenBody, error) {
 			return TokenBody{}, fmt.Errorf("Invalid Token")
 		}
 
+		isverified, ok := claims["isverified"].(bool)
+		if !ok {
+			return TokenBody{}, fmt.Errorf("Invalid Token")
+		}
+
 		if userIDFloat64 > 0 {
-			return TokenBody{UserID: int(userIDFloat64)}, nil
+			return TokenBody{UserID: int(userIDFloat64), IsVerified: isverified}, nil
 		}
 	}
 	return TokenBody{}, fmt.Errorf("Invalid Token")

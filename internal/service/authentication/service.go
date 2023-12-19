@@ -45,7 +45,8 @@ func (u *AuthenticationService) Login(request LoginServiceRequest) (string, erro
 	}
 
 	return u.token.GenerateToken(token.TokenBody{
-		UserID: AuthenticationInfo.UserId,
+		UserID:     AuthenticationInfo.UserId,
+		IsVerified: AuthenticationInfo.IsVerified,
 	})
 }
 

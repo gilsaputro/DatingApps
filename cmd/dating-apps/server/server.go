@@ -14,13 +14,17 @@ import (
 
 	"gilsaputro/dating-apps/cmd/dating-apps/config"
 	auth_handler "gilsaputro/dating-apps/internal/handler/authentication"
+	find_handler "gilsaputro/dating-apps/internal/handler/find"
 	"gilsaputro/dating-apps/internal/handler/middleware"
 	user_handler "gilsaputro/dating-apps/internal/handler/user"
 	auth_service "gilsaputro/dating-apps/internal/service/authentication"
+	find_service "gilsaputro/dating-apps/internal/service/find"
 	user_service "gilsaputro/dating-apps/internal/service/user"
+	find_store "gilsaputro/dating-apps/internal/store/findcache"
 	user_store "gilsaputro/dating-apps/internal/store/user"
 	"gilsaputro/dating-apps/pkg/hash"
 	"gilsaputro/dating-apps/pkg/postgres"
+	"gilsaputro/dating-apps/pkg/redis"
 	"gilsaputro/dating-apps/pkg/token"
 	"gilsaputro/dating-apps/pkg/vault"
 )
@@ -32,12 +36,16 @@ type Server struct {
 	hashMethod  hash.HashMethod
 	tokenMethod token.TokenMethod
 	postgres    postgres.PostgresMethod
+	redisMethod redis.RedisMethod
 	middleware  middleware.Middleware
 	userStore   user_store.UserStoreMethod
 	userService user_service.UserServiceMethod
 	userHandler user_handler.UserHandler
 	authService auth_service.AuthenticationServiceMethod
 	authHandler auth_handler.AuthenticationHandler
+	findStore   find_store.FindCacheStoreMethod
+	findService find_service.FindServiceMethod
+	findHandler find_handler.FindHandler
 	httpServer  *http.Server
 }
 
@@ -105,6 +113,17 @@ func NewServer() (*Server, error) {
 		log.Println("Init-Postgres")
 	}
 
+	// Init Redis
+	{
+		redisMethod := redis.NewRedisClient(redis.RedisConfig{
+			Host:     s.cfg.Redis.Host,
+			Port:     s.cfg.Redis.Port,
+			Password: s.cfg.Redis.Password,
+		})
+		s.redisMethod = redisMethod
+		log.Println("Init-Redis")
+	}
+
 	// Init Hash Package
 	{
 		hashMethod := hash.NewHashMethod(s.cfg.Hash.Cost)
@@ -127,6 +146,12 @@ func NewServer() (*Server, error) {
 		log.Println("Init-User Store")
 	}
 
+	{
+		findStore := find_store.NewFindCacheStore(s.redisMethod)
+		s.findStore = findStore
+		log.Println("Init-Find Cache Store")
+	}
+
 	// ======== Init Dependencies Service ========
 	// Init User Service
 	{
@@ -139,6 +164,12 @@ func NewServer() (*Server, error) {
 		authService := auth_service.NewAuthenticationService(s.userStore, s.tokenMethod, s.hashMethod)
 		s.authService = authService
 		log.Println("Init-Auth Service")
+	}
+
+	{
+		findService := find_service.NewFindService(s.userStore, s.findStore, s.cfg.MaxCounter)
+		s.findService = findService
+		log.Println("Init-Find Service")
 	}
 
 	// ======== Init Dependencies Handler ========
@@ -161,10 +192,19 @@ func NewServer() (*Server, error) {
 	// Init Auth Handler
 	{
 		var opts []auth_handler.Option
-		opts = append(opts, auth_handler.WithTimeoutOptions(s.cfg.UserHandler.TimeoutInSec))
+		opts = append(opts, auth_handler.WithTimeoutOptions(s.cfg.AuthHandler.TimeoutInSec))
 		authHandler := auth_handler.NewAuthenticationHandler(s.authService, opts...)
 		s.authHandler = *authHandler
 		log.Println("Init-Auth Handler")
+	}
+
+	// Init Find Handler
+	{
+		var opts []find_handler.Option
+		opts = append(opts, find_handler.WithTimeoutOptions(s.cfg.FindHandler.TimeoutInSec))
+		findHandler := find_handler.NewFindHandler(s.findService, opts...)
+		s.findHandler = *findHandler
+		log.Println("Init-Find Handler")
 	}
 
 	// Init Router
@@ -177,6 +217,9 @@ func NewServer() (*Server, error) {
 		// Init User Path
 		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
 		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
+
+		// Init Find Partner Path
+		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.FindPartnerHandler)).Methods("GET")
 
 		port := ":" + s.cfg.Port
 		log.Println("running on port ", port)

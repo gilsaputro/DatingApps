@@ -1,6 +1,7 @@
 {
     "data" : {
-        "postgres_config" : "host=localhost port=5492 user=user_binary dbname=dating_apps password=postgres_p4ssW0Rd sslmode=disable",
-        "token_secret": "your_secret_jwt_token"
+        "postgres_config" : "host=localhost port=5492 user=user_binary dbname=dating_apps password=banana1 sslmode=disable",
+        "token_secret": "your_secret_jwt_token",
+        "redis_password": "banana1"
     }
 }

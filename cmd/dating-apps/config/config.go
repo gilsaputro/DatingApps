@@ -13,14 +13,25 @@ import (
 type Config struct {
 	Port        string   `yaml:"port"`
 	Postgres    Postgres `yaml:"postgres"`
+	Redis       Redis    `yaml:"redis"`
 	Hash        Hash     `yaml:"hash"`
 	Token       Token    `yaml:"token"`
 	UserHandler Handler  `yaml:"user_handler"`
+	AuthHandler Handler  `yaml:"auth_handler"`
+	FindHandler Handler  `yaml:"find_handler"`
+	MaxCounter  int      `yaml:"max_find_counter"`
 }
 
 // Postgres struct to hold the configuration data for postgres
 type Postgres struct {
 	Config string `yaml:"postgres_config"`
+}
+
+// Redis struct to hold the configuration data for redis
+type Redis struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Password string `yaml:"password"`
 }
 
 // Hash struct to hold the configuration data for Hash Package
