@@ -219,7 +219,8 @@ func NewServer() (*Server, error) {
 		r.HandleFunc("/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
 
 		// Init Find Partner Path
-		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.FindPartnerHandler)).Methods("GET")
+		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.CurrentPartnerHandler)).Methods("GET")
+		r.HandleFunc("/find", s.middleware.MiddlewareVerifyToken(s.findHandler.FindPartnerHandler)).Methods("POST")
 
 		port := ":" + s.cfg.Port
 		log.Println("running on port ", port)

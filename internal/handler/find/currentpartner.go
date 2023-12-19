@@ -13,15 +13,8 @@ import (
 	"time"
 )
 
-// FindPartnerResponse is list response parameter for Login Api
-type FindPartnerResponse struct {
-	PartnerID   int    `json:"id"`
-	Fullname    string `json:"fullname"`
-	CreatedDate string `json:"created_date"`
-}
-
-// FindPartnerHandler is func handler for generate new partner
-func (h *FindHandler) FindPartnerHandler(w http.ResponseWriter, r *http.Request) {
+// CurrentPartnerHandler is func handler for get current partner
+func (h *FindHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)
 	defer cancel()
 
@@ -66,7 +59,7 @@ func (h *FindHandler) FindPartnerHandler(w http.ResponseWriter, r *http.Request)
 	errChan := make(chan error, 1)
 	var partnerInfo find.PartnerServiceInfo
 	go func(ctx context.Context) {
-		partnerInfo, err = h.service.FindPartner(find.FindPartnerServiceRequest{
+		partnerInfo, err = h.service.GetCurrentPartner(find.FindPartnerServiceRequest{
 			UserID:     userID,
 			IsVerified: isVerified,
 		})
@@ -91,15 +84,4 @@ func (h *FindHandler) FindPartnerHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	response = mapResponseLogin(partnerInfo)
-}
-
-func mapResponseLogin(result find.PartnerServiceInfo) utilhttp.StandardResponse {
-	var res utilhttp.StandardResponse
-	data := FindPartnerResponse{
-		PartnerID:   result.PartnerID,
-		Fullname:    result.Fullname,
-		CreatedDate: result.CreatedDate,
-	}
-	res.Data = data
-	return res
 }

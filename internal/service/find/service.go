@@ -13,6 +13,7 @@ import (
 // FindServiceMethod is list method for Find Service
 type FindServiceMethod interface {
 	FindPartner(request FindPartnerServiceRequest) (PartnerServiceInfo, error)
+	GetCurrentPartner(request FindPartnerServiceRequest) (PartnerServiceInfo, error)
 }
 
 // FindService is list dependencies for Find service
@@ -50,16 +51,41 @@ func (f FindService) FindPartner(request FindPartnerServiceRequest) (PartnerServ
 		}
 	}
 
+	newPartnerID, err := f.generateNewPartner(request)
+	if err != nil {
+		return PartnerServiceInfo{}, err
+	}
+
+	PartnerInfo, err := f.store.GetUserInfoByID(newPartnerID)
+	if err != nil {
+		return PartnerServiceInfo{}, err
+	}
+
+	// Set NewPartnerID to History and Add Counter
+	if !request.IsVerified {
+		numCounter++
+		f.cache.SetViewedUserCounter(userID, fmt.Sprintf("%d", numCounter))
+	}
+
+	return PartnerServiceInfo{
+		PartnerID:   PartnerInfo.UserId,
+		Fullname:    PartnerInfo.Fullname,
+		CreatedDate: PartnerInfo.CreatedDate,
+	}, nil
+}
+
+func (f FindService) generateNewPartner(request FindPartnerServiceRequest) (int, error) {
+	userID := fmt.Sprintf("%v", request.UserID)
 	// Get Total User
 	totalUser, err := f.store.Count()
 	if err != nil {
-		return PartnerServiceInfo{}, err
+		return 0, err
 	}
 
 	// Get User Partner History to duplicate generate same partner
 	partnerHistory, err := f.cache.GetViewedPartnerHistory(userID)
 	if err != nil {
-		return PartnerServiceInfo{}, err
+		return 0, err
 	}
 
 	var listPartnerHistoryInt []int
@@ -75,17 +101,6 @@ func (f FindService) FindPartner(request FindPartnerServiceRequest) (PartnerServ
 	excludePartnerID := append(listPartnerHistoryInt, request.UserID)
 	newPartnerID := generateRandomNumber(totalUser, excludePartnerID)
 
-	PartnerInfo, err := f.store.GetUserInfoByID(newPartnerID)
-	if err != nil {
-		return PartnerServiceInfo{}, err
-	}
-
-	// Set NewPartnerID to History and Add Counter
-	if !request.IsVerified {
-		numCounter++
-		f.cache.SetViewedUserCounter(userID, fmt.Sprintf("%d", numCounter))
-	}
-
 	if len(listPartnerHistoryInt) > 10 {
 		listPartnerHistoryInt = listPartnerHistoryInt[1:]
 	}
@@ -98,18 +113,14 @@ func (f FindService) FindPartner(request FindPartnerServiceRequest) (PartnerServ
 
 	err = f.cache.SetViewedPartnerHistory(userID, strings.Join(newPartnerHistory, ","))
 	if err != nil {
-		return PartnerServiceInfo{}, err
+		return 0, err
 	}
 	err = f.cache.SetCurentPartnerState(request.UserID, newPartnerID)
 	if err != nil {
-		return PartnerServiceInfo{}, err
+		return 0, err
 	}
 
-	return PartnerServiceInfo{
-		PartnerID:   PartnerInfo.UserId,
-		Fullname:    PartnerInfo.Fullname,
-		CreatedDate: PartnerInfo.CreatedDate,
-	}, nil
+	return newPartnerID, err
 }
 
 func generateRandomNumber(max int, exclude []int) int {
@@ -129,4 +140,37 @@ func generateRandomNumber(max int, exclude []int) int {
 	}
 
 	return randomNumber
+}
+
+func (f FindService) GetCurrentPartner(request FindPartnerServiceRequest) (PartnerServiceInfo, error) {
+	userID := fmt.Sprintf("%v", request.UserID)
+
+	newPartnerID, err := f.cache.GetCurentPartnerState(userID)
+	if err != nil {
+		return PartnerServiceInfo{}, err
+	}
+
+	partnerID, err := strconv.Atoi(newPartnerID)
+	if err != nil {
+		partnerID = 0
+	}
+
+	// generate if the current is not state (should be for first time user)
+	if partnerID <= 0 {
+		partnerID, err = f.generateNewPartner(request)
+		if err != nil {
+			return PartnerServiceInfo{}, err
+		}
+	}
+
+	PartnerInfo, err := f.store.GetUserInfoByID(partnerID)
+	if err != nil {
+		return PartnerServiceInfo{}, err
+	}
+
+	return PartnerServiceInfo{
+		PartnerID:   PartnerInfo.UserId,
+		Fullname:    PartnerInfo.Fullname,
+		CreatedDate: PartnerInfo.CreatedDate,
+	}, nil
 }
