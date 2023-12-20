@@ -1,12 +1,6 @@
 # Dating-Apps
 This repository contains the prototype for an Dating Application.
 
-## High-Level Design (HLD)
-For a detailed understanding of the system architecture and design, please refer to the [High-Level Design (HLD)](https://github.com/gilsaputro/dating-apps/wiki) document.
-
-## API Documentation
-The API documentation can be found in the [API Documentation](https://github.com/gilsaputro/dating-apps/wiki/Farm-Create) file in the repository. This file contains information on the endpoints, request and response formats, and any necessary details.
-
 ## Getting Started
 These intruction will get you a project and how to run the binary on your local machine.
 
