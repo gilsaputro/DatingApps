@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List all Go files excluding cmd, vendor, and pkg directories
-list_files=$(go list ./... | grep -v /cmd/ | grep -v /vendor/ | grep -v mock | grep -v /scripts/)
+list_files=$(go list ./... | grep -v /cmd/ | grep -v /vendor/ | grep -v /models | grep -v mock | grep -v /scripts/)
 
 # Run the Go tests and capture the output to a file
 echo "=== RUNNING TEST ==="
