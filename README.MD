@@ -11,7 +11,7 @@ The API documentation can be found in the [API Documentation](https://github.com
 These intruction will get you a project and how to run the binary on your local machine.
 
 ### Prerequsites
-The AquaFarm management system requires Go 1.19 or higher and Docker installed on the local machine in order to run the binary.
+The Dating Apps system requires Go 1.19 or higher and Docker installed on the local machine in order to run the binary.
 
 #### Docker
 You need to have docker installed in your machine.
@@ -41,7 +41,7 @@ cd dating-apps
 Note: These instructions assume that you have Git installed on your machine. If you don't have Git installed, you can follow the instructions on the Git website to install it.
 
 ### Docker Setup:
-To run the AquaFarm management system binary correctly, it is necessary to connect it with the related dependencies. This can be done simply by executing the following command: 
+To run the Dating Apps system binary correctly, it is necessary to connect it with the related dependencies. This can be done simply by executing the following command: 
 
 ```azure
 make deps-init
