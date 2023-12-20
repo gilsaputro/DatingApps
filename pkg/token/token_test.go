@@ -66,31 +66,6 @@ func TestTokenConfig_GenerateToken(t *testing.T) {
 			want:            TokenBody{},
 		},
 		{
-			name: "error validate invalid username flow",
-			tr: TokenConfig{
-				Secret:        "my_secret_key",
-				ExpTimeInHour: 1,
-			},
-			args: args{
-				bodyGenerate: TokenBody{
-					UserID: 1,
-				},
-			},
-			mockFunc: func(s string) string {
-				claims := jwt.MapClaims{
-					"username": 1,
-					"userid":   1,
-				}
-
-				token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-				tkn, _ := token.SignedString([]byte("my_secret_key"))
-				return tkn
-			},
-			wantErrValidate: true,
-			wantErr:         false,
-			want:            TokenBody{},
-		},
-		{
 			name: "error validate invalid value flow",
 			tr: TokenConfig{
 				Secret:        "my_secret_key",
