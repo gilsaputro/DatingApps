@@ -116,7 +116,7 @@ func (u *UserStore) GetUserInfoByID(userid int) (models.User, error) {
 	return user, nil
 }
 
-// GetUserByID is func to get user info by id on database
+// Count is func to get total user on database
 func (u *UserStore) Count() (int, error) {
 	var user models.User
 	db, err := u.getDB()

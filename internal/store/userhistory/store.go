@@ -46,21 +46,6 @@ func (u UserHistoryStore) CreateUserHistory(history models.UserMatchHistory) err
 	return db.Create(&history).Error
 }
 
-func (u UserHistoryStore) GetUserHistoryDetailByID(history models.UserMatchHistory) (models.UserMatchHistory, error) {
-	db, err := u.getDB()
-	if err != nil {
-		return models.UserMatchHistory{}, err
-	}
-
-	result := models.UserMatchHistory{}
-	err = db.Model(models.UserMatchHistory{}).First(&result, history).Error
-	if err != nil {
-		return models.UserMatchHistory{}, err
-	}
-
-	return result, err
-}
-
 func (u UserHistoryStore) GetUserHistoryListByUserID(history models.UserMatchHistory) ([]models.UserMatchHistory, error) {
 	db, err := u.getDB()
 	if err != nil {

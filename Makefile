@@ -15,3 +15,7 @@ deps-tear:
 .PHONY: run-local
 run-local:
 	@go build ./cmd/dating-apps/ && ./dating-apps
+
+.PHONY: mock
+mock:
+	mockgen -source=${source} -destination=$(patsubst %/,%,$(dir ${source}))/mock/$(notdir ${source}) -package=mock

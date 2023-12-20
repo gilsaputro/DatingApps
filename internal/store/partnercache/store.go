@@ -34,8 +34,7 @@ const currentpartnerState string = `CPS:%v` // format CPS:<userid>
 // SetCurentPartnerState is func to store current partner state of user id
 func (f *PartnerCacheStore) SetCurentPartnerState(userID, partnerID int) error {
 	key := fmt.Sprintf(currentpartnerState, userID)
-	f.rd.Set(key, partnerID, 24*time.Hour)
-	return nil
+	return f.rd.Set(key, partnerID, 24*time.Hour)
 }
 
 // GetCurentPartnerState is func to store current partner state of user id
@@ -53,8 +52,7 @@ const viewedPartnerHistory string = `VPH:%v` // format VPH:<userid>
 // SetViewedPartnerHistory is func to store viewed partner history of user id
 func (f *PartnerCacheStore) SetViewedPartnerHistory(userID, value string) error {
 	key := fmt.Sprintf(viewedPartnerHistory, userID)
-	f.rd.Set(key, value, 24*time.Hour)
-	return nil
+	return f.rd.Set(key, value, 24*time.Hour)
 }
 
 // GetViewedPartnerHistory is func to get viewed partner history of user id
@@ -75,8 +73,7 @@ const dateFormat string = "20060102"         // YYYYMMDD format
 func (f *PartnerCacheStore) SetViewedUserCounter(userID, value string) error {
 	currentTime := time.Now().Format(dateFormat)
 	key := fmt.Sprintf(viewedUserCounter, currentTime, userID)
-	f.rd.Set(key, value, 24*time.Hour)
-	return nil
+	return f.rd.Set(key, value, 24*time.Hour)
 }
 
 // GetViewedUserCounter is func to get daily viewed user counter of user id
