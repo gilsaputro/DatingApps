@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"gilsaputro/dating-apps/internal/handler/utilhttp"
 	"gilsaputro/dating-apps/internal/service/partner"
-	"gilsaputro/dating-apps/internal/service/user"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -73,12 +71,7 @@ func (h *PartnerHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Re
 		return
 	case err = <-errChan:
 		if err != nil {
-			if err == user.ErrUserNameNotExists || err == user.ErrPasswordIsIncorrect || strings.Contains(err.Error(), "not found") {
-				code = http.StatusNotFound
-				err = fmt.Errorf("Invalid Username or Password")
-			} else {
-				code = http.StatusInternalServerError
-			}
+			code = http.StatusInternalServerError
 			return
 		}
 	}
