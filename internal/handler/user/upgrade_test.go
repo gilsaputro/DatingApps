@@ -14,7 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-func TestUserHandler_DeleteUserHandler(t *testing.T) {
+func TestUserHandler_UpgradeUserHandler(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	m := mock.NewMockUserServiceMethod(mockCtrl)
 	defer mockCtrl.Finish()
@@ -44,7 +44,7 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 				timeout: 5,
 			},
 			mockFunc: func() {
-				m.EXPECT().DeleteUser(user.DeleteUserServiceRequest{
+				m.EXPECT().UpgradeUser(user.UpgradeServiceRequest{
 					UserId:   1,
 					Password: "pas1",
 				}).Return(nil)
@@ -67,7 +67,7 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 				timeout: 5,
 			},
 			mockFunc: func() {
-				m.EXPECT().DeleteUser(user.DeleteUserServiceRequest{
+				m.EXPECT().UpgradeUser(user.UpgradeServiceRequest{
 					UserId:   1,
 					Password: "pas1",
 				}).Return(fmt.Errorf("some error"))
@@ -85,12 +85,11 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 			args: args{
 				userID: 1,
 				body: `{
-					"password": "pas1"
 				}`,
 				timeout: 5,
 			},
 			mockFunc: func() {
-				m.EXPECT().DeleteUser(user.DeleteUserServiceRequest{
+				m.EXPECT().UpgradeUser(user.UpgradeServiceRequest{
 					UserId:   1,
 					Password: "pas1",
 				}).Return(user.ErrUserNameNotExists)
@@ -100,24 +99,7 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 			},
 			want: want{
 				code: 400,
-				body: `{"code":400,"message":"username is not exists"}`,
-			},
-		},
-		{
-			name: "error on invalid body value",
-			args: args{
-				userID:  1,
-				body:    `{`,
-				timeout: 5,
-			},
-			mockFunc: func() {
-			},
-			mockContext: func() (context.Context, func()) {
-				return context.Background(), func() {}
-			},
-			want: want{
-				code: 400,
-				body: `{"code":400,"message":"Bad Request"}`,
+				body: `{"code":400,"message":"Invalid Parameter Request"}`,
 			},
 		},
 	}
@@ -129,7 +111,7 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 				service:      m,
 				timeoutInSec: tt.args.timeout,
 			}
-			r := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(tt.args.body))
+			r := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(tt.args.body))
 			ctx, cancel := tt.mockContext()
 			defer cancel()
 			r = r.WithContext(ctx)
@@ -137,7 +119,7 @@ func TestUserHandler_DeleteUserHandler(t *testing.T) {
 				r = r.WithContext(context.WithValue(r.Context(), "id", tt.args.userID))
 			}
 			w := httptest.NewRecorder()
-			handler.DeleteUserHandler(w, r)
+			handler.UpgradeUserHandler(w, r)
 			result := w.Result()
 			resBody, err := ioutil.ReadAll(result.Body)
 

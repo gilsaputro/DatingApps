@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -87,7 +88,7 @@ func (h *AuthenticationHandler) RegisterUserHandler(w http.ResponseWriter, r *ht
 		return
 	case err = <-errChan:
 		if err != nil {
-			if err == user.ErrUserNameAlreadyExists {
+			if strings.Contains(err.Error(), user.ErrUserNameAlreadyExists.Error()) {
 				code = http.StatusConflict
 			} else {
 				code = http.StatusInternalServerError

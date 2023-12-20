@@ -12,7 +12,7 @@ type UpgradeUserRequest struct {
 
 type UserProfile struct {
 	UserID      int    `json:"id"`
-	Username    string `json:"uasername"`
+	Username    string `json:"username"`
 	Fullname    string `json:"fullname"`
 	Email       string `json:"email"`
 	IsVerified  bool   `json:"is_verified"`
