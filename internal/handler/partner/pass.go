@@ -11,14 +11,6 @@ import (
 	"time"
 )
 
-// PartnerPartnerResponse is list response parameter for Login Api
-type PartnerResponse struct {
-	PartnerID   int    `json:"id"`
-	Fullname    string `json:"fullname"`
-	Status      string `json:"status"`
-	CreatedDate string `json:"created_date"`
-}
-
 // PassPartnerHandler is func handler for generate new partner
 func (h *PartnerHandler) PassPartnerHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)

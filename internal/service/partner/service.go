@@ -78,6 +78,7 @@ func (f PartnerService) PassPartner(request PartnerServiceRequest) (PartnerServi
 	return PartnerServiceInfo{
 		PartnerID:   int(PartnerInfo.ID),
 		Fullname:    PartnerInfo.Fullname,
+		IsVerified:  PartnerInfo.IsVerified,
 		Status:      status,
 		CreatedDate: PartnerInfo.CreatedAt.String(),
 	}, nil
@@ -211,6 +212,7 @@ func (f PartnerService) GetCurrentPartner(request PartnerServiceRequest) (Partne
 	return PartnerServiceInfo{
 		PartnerID:   int(PartnerInfo.ID),
 		Fullname:    PartnerInfo.Fullname,
+		IsVerified:  PartnerInfo.IsVerified,
 		Status:      status,
 		CreatedDate: PartnerInfo.CreatedAt.String(),
 	}, nil

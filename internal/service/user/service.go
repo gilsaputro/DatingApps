@@ -3,7 +3,6 @@ package user
 import (
 	"gilsaputro/dating-apps/internal/store/user"
 	"gilsaputro/dating-apps/pkg/hash"
-	"strings"
 )
 
 // UserServiceMethod is list method for User Service
@@ -36,9 +35,6 @@ func (u *UserService) DeleteUser(request DeleteUserServiceRequest) error {
 
 	userInfo, err := u.store.GetUserInfoByID(request.UserId)
 	if err != nil || userInfo.ID <= 0 {
-		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
-			return ErrUserNameNotExists
-		}
 		return err
 	}
 
@@ -57,9 +53,6 @@ func (u *UserService) UpdateUser(request UpdateUserServiceRequest) (UserServiceI
 
 	userInfo, err := u.store.GetUserInfoByID(request.UserId)
 	if err != nil || userInfo.ID <= 0 {
-		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
-			return UserServiceInfo{}, ErrUserNameNotExists
-		}
 		return UserServiceInfo{}, err
 	}
 
@@ -98,9 +91,6 @@ func (u *UserService) UpdateUser(request UpdateUserServiceRequest) (UserServiceI
 func (u *UserService) GetUserByID(request GetByIDServiceRequest) (UserServiceInfo, error) {
 	userInfo, err := u.store.GetUserInfoByID(int(request.UserId))
 	if err != nil || userInfo.ID <= 0 {
-		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
-			return UserServiceInfo{}, ErrUserNameNotExists
-		}
 		return UserServiceInfo{}, err
 	}
 
@@ -109,6 +99,7 @@ func (u *UserService) GetUserByID(request GetByIDServiceRequest) (UserServiceInf
 		Username:    userInfo.Username,
 		Fullname:    userInfo.Fullname,
 		Email:       userInfo.Email,
+		IsVerified:  userInfo.IsVerified,
 		CreatedDate: userInfo.CreatedAt.String(),
 	}, nil
 }
@@ -120,9 +111,6 @@ func (u *UserService) UpgradeUser(request UpgradeServiceRequest) error {
 
 	userInfo, err := u.store.GetUserInfoByID(request.UserId)
 	if err != nil || userInfo.ID <= 0 {
-		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
-			return ErrUserNameNotExists
-		}
 		return err
 	}
 

@@ -12,21 +12,6 @@ import (
 	"time"
 )
 
-// EditUserRequest is list request parameter for Edit Api
-type EditUserRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
-	Fullname string `json:"fullname"`
-}
-
-// EditUserResponse is list response parameter for Edit Api
-type EditUserResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Fullname string `json:"fullname"`
-}
-
 // EditUserHandler is func handler for Edit user
 func (h *UserHandler) EditUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)
@@ -114,17 +99,4 @@ func (h *UserHandler) EditUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response = mapResponseEdit(result)
-}
-
-func mapResponseEdit(result user.UserServiceInfo) utilhttp.StandardResponse {
-	var res utilhttp.StandardResponse
-
-	data := EditUserResponse{
-		Username: result.Username,
-		Email:    result.Email,
-		Fullname: result.Fullname,
-	}
-
-	res.Data = data
-	return res
 }

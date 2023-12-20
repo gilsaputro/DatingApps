@@ -18,6 +18,7 @@ type PartnerServiceRequest struct {
 type PartnerServiceInfo struct {
 	PartnerID   int
 	Fullname    string
+	IsVerified  bool
 	Status      string
 	CreatedDate string
 }

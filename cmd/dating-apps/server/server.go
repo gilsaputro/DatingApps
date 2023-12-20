@@ -234,6 +234,7 @@ func NewServer() (*Server, error) {
 		r.HandleFunc("/v1/register", s.authHandler.RegisterUserHandler).Methods("POST")
 
 		// Init User Path
+		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.ProfileUserHandler)).Methods("GET")
 		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
 		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
 		r.HandleFunc("/v1/user/upgrade", s.middleware.MiddlewareVerifyToken(s.userHandler.UpgradeUserHandler)).Methods("POST")

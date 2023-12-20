@@ -85,15 +85,3 @@ func (h *PartnerHandler) CurrentPartnerHandler(w http.ResponseWriter, r *http.Re
 
 	response = mapResponse(partnerInfo)
 }
-
-func mapResponse(result partner.PartnerServiceInfo) utilhttp.StandardResponse {
-	var res utilhttp.StandardResponse
-	data := PartnerResponse{
-		PartnerID:   result.PartnerID,
-		Fullname:    result.Fullname,
-		Status:      result.Status,
-		CreatedDate: result.CreatedDate,
-	}
-	res.Data = data
-	return res
-}

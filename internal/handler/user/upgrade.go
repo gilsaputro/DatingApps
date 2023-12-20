@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-// UpgradeUserRequest is list request parameter for Upgrade Api
-type UpgradeUserRequest struct {
-	Password string `json:"password"`
-}
-
 // UpgradeUserHandler is func handler for Upgrade user
 func (h *UserHandler) UpgradeUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)

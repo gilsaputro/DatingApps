@@ -18,6 +18,7 @@ type UserServiceInfo struct {
 	Username    string
 	Fullname    string
 	Email       string
+	IsVerified  bool
 	CreatedDate string
 }
 

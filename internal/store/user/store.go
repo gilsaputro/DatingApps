@@ -66,6 +66,7 @@ func (u *UserStore) UpdateUser(userinfo models.User) error {
 	user.Password = userinfo.Password
 	user.Fullname = userinfo.Fullname
 	user.Email = userinfo.Email
+	user.IsVerified = userinfo.IsVerified
 
 	return db.Save(&user).Error
 }
