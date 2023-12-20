@@ -12,13 +12,13 @@ import (
 	"time"
 )
 
-// DeleteUserRequest is list request parameter for Delete Api
-type DeleteUserRequest struct {
+// UpgradeUserRequest is list request parameter for Upgrade Api
+type UpgradeUserRequest struct {
 	Password string `json:"password"`
 }
 
-// DeleteUserHandler is func handler for Delete user
-func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+// UpgradeUserHandler is func handler for Upgrade user
+func (h *UserHandler) UpgradeUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(h.timeoutInSec)*time.Second)
 	defer cancel()
 
@@ -36,14 +36,14 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 
 		data, errMarshal := json.Marshal(response)
 		if errMarshal != nil {
-			log.Println("[DeleteUserHandler]-Error Marshal Response :", err)
+			log.Println("[UpgradeUserHandler]-Error Marshal Response :", err)
 			code = http.StatusInternalServerError
 			data = []byte(`{"code":500,"message":"Internal Server Error"}`)
 		}
 		utilhttp.WriteResponse(w, data, code)
 	}()
 
-	var body DeleteUserRequest
+	var body UpgradeUserRequest
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		code = http.StatusBadRequest
@@ -76,7 +76,7 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 
 	errChan := make(chan error, 1)
 	go func(ctx context.Context) {
-		err = h.service.DeleteUser(user.DeleteUserServiceRequest{
+		err = h.service.UpgradeUser(user.UpgradeServiceRequest{
 			UserId:   userID,
 			Password: body.Password,
 		})
@@ -99,10 +99,10 @@ func (h *UserHandler) DeleteUserHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	response = mapResponseDelete()
+	response = mapResponseUpgrade()
 }
 
-func mapResponseDelete() utilhttp.StandardResponse {
+func mapResponseUpgrade() utilhttp.StandardResponse {
 	var res utilhttp.StandardResponse
 	return res
 }

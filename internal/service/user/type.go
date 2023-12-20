@@ -7,6 +7,7 @@ var (
 	ErrUserNameNotExists     = errors.New("username is not exists")
 	ErrUserNameAlreadyExists = errors.New("username already exists")
 	ErrPasswordIsIncorrect   = errors.New("password is incorrect")
+	ErrUserIsVerified        = errors.New("user already verified")
 	ErrUnauthorized          = errors.New("unauthorized")
 	ErrDataNotFound          = errors.New("data not found")
 )
@@ -38,4 +39,10 @@ type UpdateUserServiceRequest struct {
 // GetByIDServiceRequest is list parameter for get user by id
 type GetByIDServiceRequest struct {
 	UserId int
+}
+
+// UpgradeServiceRequest is list parameter for upgrade user
+type UpgradeServiceRequest struct {
+	UserId   int
+	Password string
 }

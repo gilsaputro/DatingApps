@@ -11,6 +11,7 @@ type UserServiceMethod interface {
 	DeleteUser(DeleteUserServiceRequest) error
 	UpdateUser(UpdateUserServiceRequest) (UserServiceInfo, error)
 	GetUserByID(GetByIDServiceRequest) (UserServiceInfo, error)
+	UpgradeUser(UpgradeServiceRequest) error
 }
 
 // UserService is list dependencies for user service
@@ -110,4 +111,30 @@ func (u *UserService) GetUserByID(request GetByIDServiceRequest) (UserServiceInf
 		Email:       userInfo.Email,
 		CreatedDate: userInfo.CreatedAt.String(),
 	}, nil
+}
+
+func (u *UserService) UpgradeUser(request UpgradeServiceRequest) error {
+	if request.UserId <= 0 {
+		return ErrDataNotFound
+	}
+
+	userInfo, err := u.store.GetUserInfoByID(request.UserId)
+	if err != nil || userInfo.ID <= 0 {
+		if (err == nil && userInfo.ID <= 0) || strings.Contains(err.Error(), "not found") {
+			return ErrUserNameNotExists
+		}
+		return err
+	}
+
+	if userInfo.IsVerified {
+		return ErrUserIsVerified
+	}
+
+	if !u.hash.CompareValue(userInfo.Password, request.Password) {
+		return ErrPasswordIsIncorrect
+	}
+
+	userInfo.IsVerified = true
+
+	return u.store.UpdateUser(userInfo)
 }

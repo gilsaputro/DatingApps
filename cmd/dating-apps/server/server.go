@@ -236,6 +236,7 @@ func NewServer() (*Server, error) {
 		// Init User Path
 		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.DeleteUserHandler)).Methods("DELETE")
 		r.HandleFunc("/v1/user", s.middleware.MiddlewareVerifyToken(s.userHandler.EditUserHandler)).Methods("PUT")
+		r.HandleFunc("/v1/user/upgrade", s.middleware.MiddlewareVerifyToken(s.userHandler.UpgradeUserHandler)).Methods("POST")
 
 		// Init Partner Partner Path
 		r.HandleFunc("/v1/partner", s.middleware.MiddlewareVerifyToken(s.middleware.MiddlewareCheckVerifiedStatus(s.partnerHandler.CurrentPartnerHandler))).Methods("GET")
